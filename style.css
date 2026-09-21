@@ -237,3 +237,108 @@ button:disabled{color:#7c7c80!important;background:#211719;box-shadow:none;borde
   .adminlink{width:100%;margin:8px 0 0!important}.public-links{display:grid;gap:4px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* RTE v6 · REDISEÑO ESTRUCTURAL CON DASHBOARD LATERAL */
+@media(min-width:901px){
+  body{padding-left:310px;min-height:100vh}
+  header{
+    position:fixed;
+    z-index:30;
+    inset:0 auto 0 0;
+    display:flex;
+    width:310px;
+    height:100vh;
+    padding:42px 28px 150px;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    text-align:center;
+    border-right:1px solid rgba(237,28,47,.28);
+    border-bottom:0;
+    background:
+      radial-gradient(circle at 50% 12%,rgba(237,28,47,.2),transparent 230px),
+      linear-gradient(180deg,#151517 0%,#09090a 55%,#050506 100%);
+    box-shadow:18px 0 60px rgba(0,0,0,.38);
+  }
+  header:before{content:"";position:absolute;top:0;right:-1px;width:2px;height:42%;background:linear-gradient(var(--rte-red),transparent);box-shadow:0 0 18px var(--rte-red)}
+  header:after{left:35px;right:35px;bottom:128px;width:auto;height:1px;transform:none;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);box-shadow:none}
+  .brand-logo{width:168px;height:168px;margin:4px auto 28px;outline-width:3px;outline-offset:7px;box-shadow:0 0 0 12px rgba(237,28,47,.055),0 22px 50px rgba(0,0,0,.65),0 0 46px rgba(237,28,47,.3)}
+  .kicker{order:2;margin-top:3px;font-size:9px;line-height:1.7}
+  header h1{order:3;max-width:250px;margin:16px 0 12px;font-size:31px;line-height:1.12;letter-spacing:.045em}
+  header h1 span{display:block;margin-top:5px}
+  header p{order:4;max-width:220px;margin-top:8px;color:#8e8e95;font-size:12px;line-height:1.6}
+  main,main.client{width:min(100% - 42px,1400px);max-width:1400px;margin:0 auto;padding:38px 0 80px}
+  main.client{max-width:1180px}
+  .public-links{
+    position:fixed;
+    z-index:40;
+    left:26px;
+    bottom:24px;
+    display:grid;
+    width:258px;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    padding:0;
+  }
+  .public-links .adminlink{width:100%;min-height:39px;margin:0!important;padding:8px 7px;font-size:8px!important}
+  .public-links .adminlink:last-child{grid-column:1/-1}
+  main.client>.adminlink{
+    position:fixed;
+    z-index:40;
+    left:26px;
+    bottom:28px;
+    width:258px;
+    margin:0!important;
+  }
+  .nav-actions{
+    position:fixed;
+    z-index:40;
+    left:24px;
+    bottom:25px;
+    display:grid;
+    width:262px;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+  .nav-actions .button-link,.nav-actions button{display:flex;min-height:39px;padding:8px;align-items:center;justify-content:center;font-size:8px}
+  .nav-actions button:last-child{background:linear-gradient(135deg,#29292d,#4c4d52)}
+  .booking-page{display:grid;grid-template-columns:minmax(280px,380px) minmax(0,1fr);gap:22px;align-items:start}
+  .booking-page .booking-intro{position:sticky;top:38px;margin:0;padding:34px 30px}
+  .booking-page .booking-intro:after{content:"RESERVA EN LÍNEA";display:block;margin-top:27px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08);color:#68686e;font-size:9px;font-weight:850;letter-spacing:.2em}
+  .booking-page>section:nth-of-type(2){margin:0}
+  .booking-page>.adminlink{display:none!important}
+  #resultadoCita,#result{padding:28px}
+  .search{padding:28px}
+  .admin{max-width:1500px}
+  .admin #dashboard>.panel{padding:27px 29px}
+  .admin .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #login{margin:calc(50vh - 180px) auto 0}
+}
+
+@media(min-width:1180px){
+  .booking-page .form{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .booking-page .slots{grid-template-columns:repeat(4,minmax(0,1fr))}
+  #result .info,#resultadoCita .info{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+@media(max-width:900px){
+  body{padding-left:0}
+  header{position:relative;width:auto;height:auto;padding:24px 16px 22px;border-right:0;border-bottom:1px solid rgba(237,28,47,.28)}
+  .brand-logo{width:112px;height:112px;margin-bottom:17px}
+  header h1{font-size:clamp(27px,8vw,42px)}
+  main,main.client{width:auto;max-width:920px;margin:18px auto 0;padding:0 13px 64px}
+  .booking-page{display:block}.booking-page .booking-intro{position:relative;top:auto}
+  .nav-actions,.public-links{position:static;width:auto}
+}
+
+@media(max-width:560px){
+  header{display:grid;grid-template-columns:82px 1fr;column-gap:17px;padding:20px 15px;text-align:left;align-items:center}
+  .brand-logo{grid-column:1;grid-row:1/5;width:78px;height:78px;margin:0;outline-width:1px;outline-offset:3px}
+  .kicker{grid-column:2;margin:0;font-size:7px;letter-spacing:.28em}
+  header h1{grid-column:2;margin:4px 0 2px;font-size:23px;line-height:1.05;letter-spacing:.035em}
+  header h1 span{display:block;margin-top:3px}
+  header p{grid-column:2;margin:2px 0 0;font-size:10px;line-height:1.35}
+  .panel{padding:17px 15px}.booking-intro{padding:22px 17px}
+  .availability-head{display:grid;grid-template-columns:1fr auto}.availability-head .secondary-action{padding:10px}
+  .stats-grid{grid-template-columns:1fr 1fr}.stat-card{min-height:94px;padding:15px}.stat-card strong{font-size:1.65rem}.stat-card span{font-size:.62rem}
+}
