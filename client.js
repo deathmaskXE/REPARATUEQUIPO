@@ -3,7 +3,7 @@ import{equipmentImageMarkup,bindEquipmentImageFallbacks}from"./equipment-images.
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import{getFirestore,doc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const app=initializeApp(firebaseConfig),db=getFirestore(app);
+const app=initializeApp(firebaseConfig),db=getFirestore(app),TALLER_WHATSAPP="584127141909";
 
 const states=[
 "Recibido",
@@ -154,7 +154,7 @@ function renderWarranty(){
 $("share").onclick=()=>{
   const respuesta=$("clientReply").value.trim();
   if(!respuesta)return alert("Escribe tu respuesta antes de enviarla.");
-  const t=`🎮 *RESPUESTA DEL CLIENTE - RTE*
+  const t=`🎮 *MENSAJE PARA REPARA TU EQUIPO*
 
 Folio: ${current.id}
 Equipo: ${current.equipo}
@@ -162,7 +162,7 @@ Estado actual: ${current.estado}
 
 *Mi respuesta:*
 ${respuesta}`;
-  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(t)}`,"_blank");
+  window.open(`https://wa.me/${TALLER_WHATSAPP}?text=${encodeURIComponent(t)}`,"_blank");
 };
 
 /* ABRIR FOLIO AUTOMÁTICAMENTE DESDE EL LINK */
@@ -181,6 +181,6 @@ if(folioURL){
 $("requestCall").onclick=()=>{
   if(!current)return;
   const nombre=current.cliente||"cliente";
-  const mensaje=`Hola, soy ${nombre}.\n\nFolio: ${current.id}\n\nMe gustaría comunicarme con el equipo de Repara Tu Equipo. Cuando tengan oportunidad, ¿podrían llamarme por WhatsApp?\n\nGracias.`;
-  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`,"_blank");
+  const mensaje=`Hola, *Repara Tu Equipo*. Soy ${nombre}.\n\nFolio: ${current.id}\n\nMe gustaría comunicarme con ustedes. Cuando tengan oportunidad, ¿podrían llamarme por WhatsApp?\n\nGracias.`;
+  window.open(`https://wa.me/${TALLER_WHATSAPP}?text=${encodeURIComponent(mensaje)}`,"_blank");
 };

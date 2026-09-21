@@ -37,4 +37,4 @@ Antes de publicar, completa:
 - Responsable, teléfono, dirección y redes en `DATOS_TALLER`, dentro de `admin.js`.
 - Las políticas de devolución, garantía y plazo de recolección.
 
-No conectes este proyecto al Firebase de XE Servicio Electrónico para evitar mezclar expedientes.
+Este proyecto utiliza el Firebase exclusivo de Repara Tu Equipo para mantener sus expedientes separados y protegidos.

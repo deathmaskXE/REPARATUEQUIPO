@@ -11,6 +11,7 @@ let all=[],ultimaRecepcion=null,mostrarIngresos=false,mostrarTelefonos=false;
 let citaOrigen=null;
 try{citaOrigen=JSON.parse(localStorage.getItem("rte_cita_recepcion")||"null")}catch(e){console.warn("No se pudo leer la cita de origen",e)}
 setupEquipmentPreview("equipo","modelo","newEquipmentPreview");
+$("telefono").placeholder="WhatsApp Venezuela (+58)";
 $("anticipo").placeholder="Anticipo recibido (USD)";
 $("costoTotal").placeholder="Costo total de la reparación (USD)";
 const etiquetaIngresos=document.querySelector(".stat-income span");
@@ -109,10 +110,11 @@ $("crear").onclick=async()=>{
 
 function normalizarWhatsApp(valor){
   let numero=String(valor||"").replace(/\D/g,"");
-  if(numero.startsWith("521")&&numero.length===13)numero=numero.slice(3);
-  else if(numero.startsWith("52")&&numero.length===12)numero=numero.slice(2);
+  if(numero.startsWith("0058"))numero=numero.slice(4);
+  else if(numero.startsWith("58")&&numero.length===12)return numero;
+  if(numero.startsWith("0")&&numero.length===11)numero=numero.slice(1);
   if(numero.length!==10)return null;
-  return "52"+numero;
+  return "58"+numero;
 }
 
 function normalizarTextoEquipo(valor){
@@ -617,7 +619,7 @@ function pdfLogoFallback(p,x,y){
 async function pdfNotaHeader(p,titulo,folio,fechaValor,fechaLabel="FECHA"){
   pdfNotaBase(p);
   const partes=fechaPartes(fechaValor);
-  const logo=await cargarLogoXE().catch(()=>null);
+  const logo=await cargarLogoRTE().catch(()=>null);
   if(logo)p.addImage(logo,"JPEG",10,8,36,36,undefined,"FAST");else pdfLogoFallback(p,10,12);
   p.setDrawColor(...NOTA_CYAN);p.setLineWidth(.55);p.line(59,12,151,12);p.line(59,42,151,42);
   p.setTextColor(250,250,250);p.setFont("helvetica","bolditalic");p.setFontSize(18);p.text(titulo,105,28,{align:"center"});
@@ -744,7 +746,7 @@ const DATOS_TALLER={
   maps:"POR CONFIGURAR"
 };
 let logoRteCache=null;
-function cargarLogoXE(){
+function cargarLogoRTE(){
   if(logoRteCache)return Promise.resolve(logoRteCache);
   return new Promise((resolve,reject)=>{
     const img=new Image();
@@ -775,7 +777,7 @@ function premiumField(p,label,value,x,y,w,accent=[19,150,205],options={}){
 async function generarPDFEntregaAnterior(x){
   if(!x||!window.jspdf)return alert("No se pudo cargar el generador PDF.");
   try{
-    const logo=await cargarLogoXE();
+    const logo=await cargarLogoRTE();
     const {jsPDF}=window.jspdf,p=new jsPDF({unit:"mm",format:"a4",compress:true});
     const azul=[16,151,211],azulOscuro=[7,53,88],oro=[207,161,55],plata=[168,178,189],negro=[8,12,18];
     const total=Number(x.costoTotal)||0,anticipo=Number(x.anticipo)||0,pagoFinal=Math.max(0,total-anticipo);

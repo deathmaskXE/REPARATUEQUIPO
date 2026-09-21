@@ -3,10 +3,11 @@ import{setupEquipmentPreview}from"./equipment-images.js?v=20260801-2";
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import{getFirestore,collection,doc,getDocs,query,where,writeBatch}from"https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const app=initializeApp(firebaseConfig),db=getFirestore(app),$=id=>document.getElementById(id);
+const app=initializeApp(firebaseConfig),db=getFirestore(app),$=id=>document.getElementById(id),TALLER_WHATSAPP="584127141909";
 const HORARIOS=["10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"];
 let horaElegida="";
 setupEquipmentPreview("equipo","modelo","bookingEquipmentPreview");
+$("telefono").placeholder="WhatsApp Venezuela (+58)";
 
 function hoyISO(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
 $("fechaReserva").min=hoyISO();
@@ -56,7 +57,9 @@ $("solicitarCita").onclick=async()=>{
     batch.set(doc(db,"solicitudes_citas",folio),d);
     batch.set(doc(db,"disponibilidad_citas",`${fecha}_${hora.replace(":","-")}`),{fecha,hora,solicitud:folio});
     await batch.commit();
-    $("bookingMsg").innerHTML=`<strong>SOLICITUD RECIBIDA</strong><br>Folio ${folio}. El taller confirmará contigo por WhatsApp.`;
+    const mensajeTaller=`Hola, *Repara Tu Equipo*. Soy ${d.cliente}.\n\nAcabo de enviar una solicitud de cita.\n\n*Folio:* ${folio}\n*Equipo:* ${d.equipo}${d.modelo?` ${d.modelo}`:""}\n*Fecha:* ${fechaBonita(d.fecha)}\n*Hora:* ${horaBonita(d.hora)}\n\nQuedo atento a su confirmación. Gracias.`;
+    const enlaceTaller=`https://wa.me/${TALLER_WHATSAPP}?text=${encodeURIComponent(mensajeTaller)}`;
+    $("bookingMsg").innerHTML=`<strong>SOLICITUD RECIBIDA</strong><br>Folio ${folio}. El taller confirmará contigo por WhatsApp.<br><br><a class="button-link whatsapp-action" href="${enlaceTaller}" target="_blank" rel="noopener">ENVIAR MENSAJE AL TALLER</a>`;
     ["cliente","telefono","equipo","modelo","falla"].forEach(id=>$(id).value="");$("equipo").dispatchEvent(new Event("change"));
     await cargarHorarios();
   }catch(e){console.error(e);$("bookingMsg").textContent="No se pudo enviar la solicitud. Revisa los datos e intenta nuevamente."}
