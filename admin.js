@@ -11,6 +11,10 @@ let all=[],ultimaRecepcion=null,mostrarIngresos=false,mostrarTelefonos=false;
 let citaOrigen=null;
 try{citaOrigen=JSON.parse(localStorage.getItem("rte_cita_recepcion")||"null")}catch(e){console.warn("No se pudo leer la cita de origen",e)}
 setupEquipmentPreview("equipo","modelo","newEquipmentPreview");
+$("anticipo").placeholder="Anticipo recibido (USD)";
+$("costoTotal").placeholder="Costo total de la reparación (USD)";
+const etiquetaIngresos=document.querySelector(".stat-income span");
+if(etiquetaIngresos)etiquetaIngresos.textContent="INGRESOS DEL MES (USD)";
 
 $("loginBtn").onclick=async()=>{
   try{
@@ -43,7 +47,7 @@ function asegurarPanelGanancias(){
   if($("monthlyIncome"))return;
   const panel=document.createElement("section");
   panel.className="panel monthly-income-panel";
-  panel.innerHTML=`<div class="head"><div><h2>GANANCIAS MES POR MES</h2><p>Incluye reparaciones entregadas y cobros de devoluci\u00f3n.</p></div></div><div class="income-table-wrap"><table class="income-table"><thead><tr><th>Mes</th><th>Entregados</th><th>Devueltos</th><th>Ingresos</th></tr></thead><tbody id="monthlyIncome"></tbody></table></div><small>Las devoluciones usan $200 MXN por equipo o $50 MXN por control; puedes modificar el importe en cada expediente.</small>`;
+  panel.innerHTML=`<div class="head"><div><h2>GANANCIAS MES POR MES</h2><p>Incluye reparaciones entregadas y cobros de devoluci\u00f3n en dólares estadounidenses.</p></div></div><div class="income-table-wrap"><table class="income-table"><thead><tr><th>Mes</th><th>Entregados</th><th>Devueltos</th><th>Ingresos (USD)</th></tr></thead><tbody id="monthlyIncome"></tbody></table></div><small>Las devoluciones usan $20 USD por equipo o $5 USD por control; puedes modificar el importe en cada expediente.</small>`;
   const panels=$("dashboard").querySelectorAll(".panel");
   const lista=[...panels].find(x=>x.querySelector("#list"));
   $("dashboard").insertBefore(panel,lista||null);
@@ -212,7 +216,7 @@ function esControl(x){
   return normalizarTextoEquipo(`${x.equipo||""} ${x.modelo||""}`).includes("control");
 }
 
-function tarifaDevolucionSugerida(x){return esControl(x)?50:200}
+function tarifaDevolucionSugerida(x){return esControl(x)?5:20}
 function ingresoExpediente(x){
   if(x.estado==="Entregado")return Math.max(0,Number(x.costoTotal)||0);
   if(x.estado==="DevoluciÃ³n")return Math.max(0,Number(x.importeDevolucion??tarifaDevolucionSugerida(x))||0);
@@ -325,7 +329,7 @@ function fechaCsv(valor){
 }
 
 $("exportCsv").onclick=()=>{
-  const encabezados=["Folio","Cliente","Teléfono","Correo","Equipo","Modelo","Marca","Serie","Color","Falla reportada","Estado","Fecha de recepción","Fecha de entrega","Anticipo","Costo total","Reparación realizada","Garantía hasta"];
+  const encabezados=["Folio","Cliente","Teléfono","Correo","Equipo","Modelo","Marca","Serie","Color","Falla reportada","Estado","Fecha de recepción","Fecha de entrega","Anticipo (USD)","Costo total (USD)","Reparación realizada","Garantía hasta"];
   const filas=all.map(x=>[x.id,x.cliente,x.telefono,x.correo,x.equipo,x.modelo,x.marca,x.serie,x.color,x.falla,x.estado,fechaCsv(x.recibido),fechaCsv(x.entregado),Number(x.anticipo)||0,Number(x.costoTotal)||0,x.reparacionRealizada,fechaCsv(x.garantiaHasta)]);
   const csv="\uFEFF"+[encabezados,...filas].map(fila=>fila.map(celdaCsv).join(",")).join("\r\n");
   descargarArchivo(csv,selloArchivo("RTE-Equipos","csv"),"text/csv;charset=utf-8");
@@ -347,7 +351,7 @@ function agregarEditoresExpediente(){
     if(x.estado==="Devoluci\u00f3n"&&finanzas){
       const campo=document.createElement("input");
       campo.type=mostrarIngresos?"number":"password";campo.dataset.devolucion=id;
-      campo.placeholder="Ingreso por devoluci\u00f3n";campo.setAttribute("aria-label","Ingreso por devoluci\u00f3n");
+      campo.placeholder="Ingreso por devolución (USD)";campo.setAttribute("aria-label","Ingreso por devolución en dólares");
       if(mostrarIngresos){campo.min="0";campo.step="0.01";campo.value=String(x.importeDevolucion??tarifaDevolucionSugerida(x));campo.onchange=async()=>{await updateDoc(doc(db,"equipos",id),{importeDevolucion:Math.max(0,Number(campo.value)||0)})}}
       else{campo.className="private-money";campo.value="\u2022\u2022\u2022\u2022\u2022\u2022";campo.readOnly=true}
       finanzas.insertBefore(campo,finanzas.querySelector("textarea"));
@@ -372,8 +376,8 @@ function render(){
   const f=$("filter").value.toLowerCase();
   const arr=all.filter(x=>(x.id+" "+x.cliente+" "+x.equipo).toLowerCase().includes(f));
   const inputImporte=(tipo,id,valor,placeholder)=>mostrarIngresos
-    ?`<input type="number" min="0" step="0.01" data-${tipo}="${id}" value="${Number(valor||0)}" placeholder="${placeholder}">`
-    :`<input type="password" class="private-money" data-${tipo}="${id}" value="••••••" placeholder="${placeholder}" readonly aria-label="${placeholder} oculto">`;
+    ?`<input type="number" min="0" step="0.01" data-${tipo}="${id}" value="${Number(valor||0)}" placeholder="${placeholder} (USD)">`
+    :`<input type="password" class="private-money" data-${tipo}="${id}" value="••••••" placeholder="${placeholder} (USD)" readonly aria-label="${placeholder} en dólares oculto">`;
 
   const tarjeta=x=>{const g=garantiaInfo(x);const historial=(x.historial||[]).slice().reverse();const clase=x.estado==="Entregado"?"item-entregado":x.estado==="Devolución"?"item-devolucion":"item-taller";const telefono=mostrarTelefonos?esc(x.telefono||"Sin número"):"••• ••• ••••";return `<div class="item ${clase}">${equipmentImageMarkup(x.equipo,x.modelo,true)}<div class="itemtop"><div><h3>${x.id} · ${esc(x.equipo)}</h3><p>${esc(x.cliente)} · ${esc(x.falla||"Sin falla reportada")}</p><p>WhatsApp: <span class="phone-value">${telefono}</span></p><div class="warranty-badge ${g.clase}"><b>${g.texto}</b><span>${g.detalle}</span></div></div><b>${x.estado}</b></div><div class="controls"><select data-state="${x.id}">${states.map(s=>`<option ${s===x.estado?"selected":""}>${s}</option>`).join("")}</select><textarea data-note="${x.id}" placeholder="Nueva actualización visible para el cliente">${esc(x.nota||"")}</textarea><button data-save="${x.id}">GUARDAR Y AVISAR</button></div><div class="financial-edit">${inputImporte("anticipo",x.id,x.anticipo,"Anticipo")}${inputImporte("total",x.id,x.costoTotal,"Costo total")}<textarea data-reparacion="${x.id}" placeholder="Reparación realizada para el PDF de entrega">${esc(x.reparacionRealizada||"")}</textarea><button data-finanzas="${x.id}">GUARDAR IMPORTES</button></div><div class="pdf-actions"><button data-pdf-recepcion="${x.id}">PDF RECEPCIÓN Y ANTICIPO</button><button data-pdf-entrega="${x.id}">NOTA DE ENTREGA Y PAGO</button></div><label class="notify-check"><input type="checkbox" data-notify="${x.id}" checked> Abrir WhatsApp con el aviso después de guardar</label><details class="admin-history"><summary>HISTORIAL (${historial.length})</summary><div>${historial.map(h=>`<div class="history-entry"><small>${new Date(h.fecha).toLocaleString("es-MX")}</small><b>${esc(h.estado||"")}</b><span>${esc(h.nota||"Sin nota")}</span></div>`).join("")||"<p>Sin historial.</p>"}</div></details></div>`};
 
@@ -510,7 +514,7 @@ if(paramsAdmin.get("desdeCita")==="1"){
 }
 
 
-function moneda(v){return new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"}).format(Number(v)||0)}
+function moneda(v){return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",currencyDisplay:"symbol"}).format(Number(v)||0)+" USD"}
 function fechaLarga(v){return v?new Date(v).toLocaleString("es-MX",{dateStyle:"long",timeStyle:"short"}):"No especificada"}
 function fechaMilisegundos(v){
   if(!v)return null;
@@ -822,7 +826,7 @@ async function generarPDFEntregaAnterior(x){
 
     // Panel financiero.
     premiumPanel(p,12,226,120,42,"Detalle de pago",azulOscuro,true);
-    p.setTextColor(...plata);p.setFont("helvetica","normal");p.setFontSize(7);p.text("COSTO TOTAL",20,247);p.text("ANTICIPO",57,247);p.text("PAGO FINAL",94,247);
+    p.setTextColor(...plata);p.setFont("helvetica","normal");p.setFontSize(7);p.text("COSTO TOTAL (USD)",20,247);p.text("ANTICIPO (USD)",57,247);p.text("PAGO FINAL (USD)",94,247);
     p.setTextColor(245,247,250);p.setFont("helvetica","bold");p.setFontSize(11);p.text(moneda(total),20,259);p.text(moneda(anticipo),57,259);
     p.setTextColor(...oro);p.text(moneda(pagoFinal),94,259);
 
